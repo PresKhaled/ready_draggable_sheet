@@ -61,7 +61,7 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
         dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
         onDismiss: (barrierDismissible
             ? () {
-                // animation!.
+                controller!.reverse();
                 onBarrierTapped!();
               }
             : null),
