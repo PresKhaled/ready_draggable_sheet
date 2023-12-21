@@ -7,6 +7,7 @@ import 'components/RHorizontalSeparator.dart';
 class ReadyDraggableScrollableSheetContainer {
   final ReadyDraggableScrollableSheetController controller;
   final BuildContext context;
+  final double? fixedHeight;
   final Widget? header;
   final EdgeInsets contentMargin;
   final List<Flexible> content;
@@ -30,6 +31,7 @@ class ReadyDraggableScrollableSheetContainer {
 
   ReadyDraggableScrollableSheetContainer({
     required this.controller,
+    this.fixedHeight,
     required this.context,
     this.header,
     this.contentMargin = EdgeInsets.zero,
@@ -97,6 +99,66 @@ class ReadyDraggableScrollableSheetContainer {
       },
     );
 
+    void push_() {
+      final ReadyDraggableScrollableSheetRoute route = ReadyDraggableScrollableSheetRoute(
+        settings: RouteSettings(name: controller.routeName),
+        builder: (BuildContext context) {
+          double sheetHeight = 0.0;
+
+          if (fixedHeight == null) {
+            sheetHeight += (_horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size.height;
+
+            if (_headerKey.currentWidget != null) {
+              sheetHeight += (_headerKey.currentContext!.findRenderObject() as RenderBox).size.height;
+            }
+
+            sheetHeight += (_contentKey.currentContext!.findRenderObject() as RenderBox).size.height;
+          }
+
+          return ReadyDraggableScrollableSheet(
+            controller: controller,
+            height: (fixedHeight ?? sheetHeight),
+            builder: (BuildContext context, ScrollController scrollController) {
+              return SingleChildScrollView(
+                controller: scrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Horizontal separator.
+                    if (!openFromTop) _horizontalSeparatorKey.currentWidget!,
+
+                    // Header
+                    if (header != null) _headerKey.currentWidget!,
+
+                    // Content
+                    _contentKey.currentWidget!,
+
+                    // Bottom drag bar.
+                    if (openFromTop) _horizontalSeparatorKey.currentWidget!,
+                  ],
+                ),
+              );
+            },
+            initialChildSize: initialChildSize,
+            minChildSize: minChildSize,
+            snap: snap,
+            snapSizes: snapSizes,
+            openFromTop: openFromTop,
+            borderRadius: borderRadius,
+            colors: colors,
+            onClosed: () {
+              if (onClosed != null) onClosed!();
+            },
+          );
+        },
+        withBarrier: withBarrier,
+        onBarrierTapped: () => controller.close(context),
+      );
+
+      Navigator.of(context).push(route);
+    }
+
     void open_() {
       late final VoidCallback listener;
 
@@ -105,70 +167,20 @@ class ReadyDraggableScrollableSheetContainer {
           _overlayEntry.remove();
           // _overlayEntry.dispose();
 
-          final ReadyDraggableScrollableSheetRoute route = ReadyDraggableScrollableSheetRoute(
-            settings: RouteSettings(name: controller.routeName),
-            builder: (BuildContext context) {
-              double sheetHeight = 0.0;
-
-              sheetHeight += (_horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size.height;
-
-              if (_headerKey.currentWidget != null) {
-                sheetHeight += (_headerKey.currentContext!.findRenderObject() as RenderBox).size.height;
-              }
-
-              sheetHeight += (_contentKey.currentContext!.findRenderObject() as RenderBox).size.height;
-
-              return ReadyDraggableScrollableSheet(
-                controller: controller,
-                height: sheetHeight,
-                builder: (BuildContext context, ScrollController scrollController) {
-                  return SingleChildScrollView(
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Horizontal separator.
-                        if (!openFromTop) _horizontalSeparatorKey.currentWidget!,
-
-                        // Header
-                        if (header != null) _headerKey.currentWidget!,
-
-                        // Content
-                        _contentKey.currentWidget!,
-
-                        // Bottom drag bar.
-                        if (openFromTop) _horizontalSeparatorKey.currentWidget!,
-                      ],
-                    ),
-                  );
-                },
-                initialChildSize: initialChildSize,
-                minChildSize: minChildSize,
-                snap: snap,
-                snapSizes: snapSizes,
-                openFromTop: openFromTop,
-                borderRadius: borderRadius,
-                colors: colors,
-                onClosed: () {
-                  if (onClosed != null) onClosed!();
-                },
-              );
-            },
-            withBarrier: withBarrier,
-            onBarrierTapped: () => controller.close(context),
-          );
-
-          Navigator.of(context).push(route);
+          push_();
 
           _contentOfOverlayEntryIsProcessed.removeListener(listener);
           _contentOfOverlayEntryIsProcessed.value = false;
         }
       };
 
-      _contentOfOverlayEntryIsProcessed.addListener(listener);
+      if (fixedHeight == null) {
+        _contentOfOverlayEntryIsProcessed.addListener(listener);
 
-      Overlay.of(context).insert(_overlayEntry);
+        Overlay.of(context).insert(_overlayEntry);
+      } else {
+        push_();
+      }
     }
 
     controller.statusOfSheet.addListener(() {
