@@ -1,0 +1,29 @@
+import 'package:flutter/material.dart';
+
+class RHorizontalSeparator extends StatelessWidget {
+  final EdgeInsets padding;
+  final double thickness;
+  final Color? color;
+
+  const RHorizontalSeparator({
+    super.key,
+    this.padding = const EdgeInsets.symmetric(
+      vertical: 5.0,
+    ),
+    this.thickness = 4.0,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding,
+      width: (MediaQuery.of(context).size.width / 6),
+      height: thickness,
+      decoration: BoxDecoration(
+        color: (color ?? Theme.of(context).colorScheme.onSurfaceVariant),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+    );
+  }
+}
