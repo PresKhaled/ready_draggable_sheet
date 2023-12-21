@@ -102,6 +102,7 @@ class ReadyDraggableScrollableSheetContainer {
     void push_() {
       final ReadyDraggableScrollableSheetRoute route = ReadyDraggableScrollableSheetRoute(
         settings: RouteSettings(name: controller.routeName),
+        opaque: false,
         builder: (BuildContext context) {
           double sheetHeight = 0.0;
 
