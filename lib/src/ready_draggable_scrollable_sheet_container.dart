@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ready_draggable_sheet/src/ready_draggable_scrollable_sheet.dart';
-
+import 'dart:ui' show PlatformDispatcher;
 import '../ready_draggable_sheet.dart';
 import 'components/RHorizontalSeparator.dart';
 
@@ -27,7 +27,6 @@ class ReadyDraggableScrollableSheetContainer {
   ////////////////////////////////////////
   late final OverlayEntry _overlayEntry;
   final ValueNotifier<bool> _contentOfOverlayEntryIsProcessed = ValueNotifier<bool>(false);
-  final GlobalKey _horizontalSeparatorKey = GlobalKey(), _headerKey = GlobalKey(), _contentKey = GlobalKey();
 
   ReadyDraggableScrollableSheetContainer({
     required this.controller,
@@ -48,12 +47,26 @@ class ReadyDraggableScrollableSheetContainer {
   })  : assert(initialChildSize >= 0.0 && initialChildSize <= 1.0),
         assert(minChildSize >= 0.0 && minChildSize <= 1.0) {
     /////////////////////////////
+    Widget? horizontalSeparatorWidget, headerWidget, contentWidget;
+    Size? horizontalSeparatorSize, headerSize, contentSize;
+
     // Used to calculate the sizes of the sheet parts (widgets).
     _overlayEntry = OverlayEntry(
       builder: (BuildContext context) {
-        final double screenHeight = MediaQuery.of(context).size.height;
+        final GlobalKey horizontalSeparatorKey = GlobalKey(), headerKey = GlobalKey(), contentKey = GlobalKey();
+        final double screenHeight = MediaQueryData.fromView(PlatformDispatcher.instance.implicitView!).size.height; // MediaQuery.of(context).size.height;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          horizontalSeparatorWidget = horizontalSeparatorKey.currentWidget!;
+          horizontalSeparatorSize = (horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size;
+          if (header != null) {
+            headerWidget = headerKey.currentWidget!;
+            headerSize = (headerKey.currentContext!.findRenderObject() as RenderBox).size;
+          }
+
+          contentWidget = contentKey.currentWidget!;
+          contentSize = (contentKey.currentContext!.findRenderObject() as RenderBox).size;
+
           _contentOfOverlayEntryIsProcessed.value = true;
         });
 
@@ -71,18 +84,18 @@ class ReadyDraggableScrollableSheetContainer {
                     children: [
                       // Horizontal separator (Top or bottom drag bar).
                       IntrinsicHeight(
-                        key: _horizontalSeparatorKey,
+                        key: horizontalSeparatorKey,
                         child: const RHorizontalSeparator(),
                       ),
                       // Header
                       if (header != null)
                         IntrinsicHeight(
-                          key: _headerKey,
+                          key: headerKey,
                           child: header!,
                         ),
                       // Content
                       Flexible(
-                        key: _contentKey,
+                        key: contentKey,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -106,14 +119,14 @@ class ReadyDraggableScrollableSheetContainer {
         builder: (BuildContext context) {
           double sheetHeight = 0.0;
 
-          if (fixedHeight == null) {
-            sheetHeight += (_horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size.height;
-
-            if (_headerKey.currentWidget != null) {
-              sheetHeight += (_headerKey.currentContext!.findRenderObject() as RenderBox).size.height;
-            }
-
-            sheetHeight += (_contentKey.currentContext!.findRenderObject() as RenderBox).size.height;
+          if (horizontalSeparatorSize != null) {
+            sheetHeight += horizontalSeparatorSize!.height;
+          }
+          if (headerSize != null) {
+            sheetHeight += headerSize!.height;
+          }
+          if (contentSize != null) {
+            sheetHeight += contentSize!.height;
           }
 
           return ReadyDraggableScrollableSheet(
@@ -127,16 +140,16 @@ class ReadyDraggableScrollableSheetContainer {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Horizontal separator.
-                    if (!openFromTop) _horizontalSeparatorKey.currentWidget!,
+                    if (!openFromTop) horizontalSeparatorWidget!,
 
                     // Header
-                    if (header != null) _headerKey.currentWidget!,
+                    if (headerWidget != null) headerWidget!,
 
                     // Content
-                    _contentKey.currentWidget!,
+                    contentWidget!,
 
                     // Bottom drag bar.
-                    if (openFromTop) _horizontalSeparatorKey.currentWidget!,
+                    if (openFromTop) horizontalSeparatorWidget!,
                   ],
                 ),
               );
@@ -166,7 +179,6 @@ class ReadyDraggableScrollableSheetContainer {
       listener = () {
         if (_contentOfOverlayEntryIsProcessed.value) {
           _overlayEntry.remove();
-          // _overlayEntry.dispose();
 
           push_();
 
@@ -192,6 +204,11 @@ class ReadyDraggableScrollableSheetContainer {
   }
 
   Future<void> dispose() async {
-    // controller.dispose();
+    if (context.mounted) {
+      await controller.maybeClose(context);
+    }
+
+    _overlayEntry.dispose();
+    controller.dispose();
   }
 }

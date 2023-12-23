@@ -249,7 +249,7 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
                                         iconColor: foregroundColor,
                                       ),
                                       iconButtonTheme: IconButtonThemeData(
-                                        style: themeData.iconButtonTheme.style!.copyWith(
+                                        style: themeData.iconButtonTheme.style?.copyWith(
                                           foregroundColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
                                             if (states.contains(MaterialState.disabled)) return themeData.disabledColor;
 

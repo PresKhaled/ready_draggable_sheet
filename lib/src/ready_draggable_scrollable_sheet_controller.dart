@@ -11,8 +11,8 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   final ValueNotifier<bool?> sheetIsBeingClosed = ValueNotifier<bool?>(null);
   final ValueNotifier<bool> sheetClosingSignal = ValueNotifier<bool>(false);
   late final ValueNotifier<bool> _statusOfSheet = ValueNotifier<bool>(false);
-  bool _injectionWasCancelled = false;
   bool _animating = false;
+  bool _disposed = false;
 
   ReadyDraggableScrollableSheetController({
     this.label,
@@ -24,7 +24,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   bool get open_ => _statusOfSheet.value;
 
   Future<bool> open() async {
-    _ensureThatInjectionIsNotCancelled();
+    _ensureNotDisposed();
 
     final Completer<bool> completer = Completer();
     final bool opened = _statusOfSheet.value;
@@ -51,7 +51,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   }
 
   Future<bool> animateTo(double pageFraction) async {
-    _ensureThatInjectionIsNotCancelled();
+    _ensureNotDisposed();
 
     if (!open_) {
       throw Exception('The [ReadyDraggableScrollableSheet#$label] must be open to use this method.');
@@ -77,7 +77,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   }
 
   Future<bool> close(BuildContext context) async {
-    _ensureThatInjectionIsNotCancelled();
+    _ensureNotDisposed();
 
     final Completer<bool> completer = Completer();
     final bool opened = _statusOfSheet.value;
@@ -113,7 +113,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   }
 
   Future<bool> maybeClose(BuildContext context) async {
-    _ensureThatInjectionIsNotCancelled();
+    _ensureNotDisposed();
 
     if (open_) {
       return await close(context);
@@ -122,15 +122,15 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     return false;
   }
 
-  void _ensureThatInjectionIsNotCancelled() {
-    if (_injectionWasCancelled) throw Exception('This controller cannot be used after injection cancellation has been performed.');
+  void _ensureNotDisposed() {
+    if (_disposed) throw Exception('This controller cannot be used after [dispose()] has been performed.');
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    _injectionWasCancelled = true;
+    _disposed = true;
 
     sheetIsBeingOpened.value = null;
     sheetIsBeingClosed.value = null;

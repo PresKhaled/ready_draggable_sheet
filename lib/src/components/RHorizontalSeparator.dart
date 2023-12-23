@@ -16,13 +16,19 @@ class RHorizontalSeparator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: padding,
-      width: (MediaQuery.of(context).size.width / 6),
-      height: thickness,
-      decoration: BoxDecoration(
-        color: (color ?? Theme.of(context).colorScheme.onSurfaceVariant),
-        borderRadius: BorderRadius.circular(12.0),
+      child: Center(
+        child: SizedBox(
+          width: (MediaQuery.of(context).size.width / 6),
+          height: thickness,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: (color ?? Theme.of(context).colorScheme.onSurfaceVariant),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+          ),
+        ),
       ),
     );
   }

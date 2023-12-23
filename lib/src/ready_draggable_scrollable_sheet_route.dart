@@ -14,9 +14,9 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
     super.settings,
     super.filter,
     super.traversalEdgeBehavior,
-    required this.builder,
     bool maintainState = true,
     bool opaque = true,
+    required this.builder,
     this.withBarrier = true,
     this.onBarrierTapped,
     bool barrierDismissible = true,
@@ -47,6 +47,7 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
 
     late final Widget barrier;
 
+    // Copied from Framework.
     if (barrierColor!.alpha != 0 && !offstage) {
       // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != barrierColor!.withOpacity(0.0));
@@ -86,14 +87,14 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
   }
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 250);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 200);
-
-  @override
   bool get maintainState => _maintainState;
 
   @override
   bool get opaque => _opaque;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 250);
+
+  @override
+  Duration get reverseTransitionDuration => const Duration(milliseconds: 200);
 }
