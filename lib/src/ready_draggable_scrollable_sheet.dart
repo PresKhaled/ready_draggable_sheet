@@ -130,7 +130,13 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
   void dispose() {
     widget.controller.sheetClosingSignal.removeListener(_closingSignalListener!);
     _animationControllerTranslate.removeStatusListener(_animationControllerTranslateListener!);
+    if (_animationControllerTranslate.isAnimating) {
+      _animationControllerTranslate.stop();
+    }
     _animationControllerTranslate.dispose();
+
+    // [!_closing] = The sheet closes immediately.
+    if (widget.onClosed != null && !_closing) widget.onClosed!();
 
     super.dispose(); // NOTE: Leave it at the end.
   }

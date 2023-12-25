@@ -76,28 +76,33 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     return true; // Signal
   }
 
-  Future<bool> close(BuildContext context) async {
+  Future<bool> close(
+    BuildContext context, {
+    bool immediately = false,
+  }) async {
     _ensureNotDisposed();
 
     final Completer<bool> completer = Completer();
     final bool opened = _statusOfSheet.value;
 
     if (opened) {
-      late final VoidCallback listener;
+      if (!immediately) {
+        late final VoidCallback listener;
 
-      listener = () {
-        if (sheetIsBeingClosed.value == false) {
-          completer.complete(true); // Closed
+        listener = () {
+          if (sheetIsBeingClosed.value == false) {
+            completer.complete(true); // Closed
 
-          sheetIsBeingClosed.removeListener(listener);
-        }
-      };
+            sheetIsBeingClosed.removeListener(listener);
+          }
+        };
 
-      sheetIsBeingClosed.addListener(listener);
+        sheetIsBeingClosed.addListener(listener);
 
-      sheetClosingSignal.value = true;
+        sheetClosingSignal.value = true;
 
-      await completer.future;
+        await completer.future;
+      }
 
       if (context.mounted) {
         Navigator.of(context).pop(true);
@@ -105,6 +110,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
 
       _statusOfSheet.value = false;
       sheetClosingSignal.value = false;
+      sheetIsBeingClosed.value = false;
 
       return true; // Signal
     }
@@ -112,11 +118,17 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     throw Exception('The [ReadyDraggableScrollableSheet#$label] must be open to be closed.');
   }
 
-  Future<bool> maybeClose(BuildContext context) async {
+  Future<bool> maybeClose(
+    BuildContext context, {
+    bool immediately = false,
+  }) async {
     _ensureNotDisposed();
 
     if (open_) {
-      return await close(context);
+      return await close(
+        context,
+        immediately: immediately,
+      );
     }
 
     return false;
