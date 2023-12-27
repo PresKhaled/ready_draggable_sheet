@@ -170,6 +170,8 @@ class ReadyDraggableScrollableSheetContainer {
         onBarrierTapped: () => controller.close(context),
       );
 
+      controller.associateRoute = route; // Mandatory
+
       Navigator.of(context).push(route);
     }
 
@@ -205,7 +207,7 @@ class ReadyDraggableScrollableSheetContainer {
 
   Future<void> dispose() async {
     if (context.mounted) {
-      await controller.maybeClose(context);
+      await controller.maybeClose(context, immediately: true,);
     }
 
     _overlayEntry.dispose();

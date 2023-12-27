@@ -10,7 +10,8 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   final ValueNotifier<bool?> sheetIsBeingOpened = ValueNotifier<bool?>(null);
   final ValueNotifier<bool?> sheetIsBeingClosed = ValueNotifier<bool?>(null);
   final ValueNotifier<bool> sheetClosingSignal = ValueNotifier<bool>(false);
-  late final ValueNotifier<bool> _statusOfSheet = ValueNotifier<bool>(false);
+  final ValueNotifier<Route?> _associatedRoute = ValueNotifier<Route?>(null);
+  final ValueNotifier<bool> _statusOfSheet = ValueNotifier<bool>(false);
   bool _animating = false;
   bool _disposed = false;
 
@@ -22,6 +23,8 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   ValueNotifier<bool> get statusOfSheet => _statusOfSheet;
   bool get attached => statusOfSheet.hasListeners;
   bool get open_ => _statusOfSheet.value;
+
+  set associateRoute(Route? route) => _associatedRoute.value = route;
 
   Future<bool> open() async {
     _ensureNotDisposed();
@@ -82,6 +85,12 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   }) async {
     _ensureNotDisposed();
 
+    final Route? associatedRoute = _associatedRoute.value;
+
+    if (associatedRoute == null) {
+      throw Exception('The [ReadyDraggableScrollableSheet#$label] must be associated with a route by executing [associateRoute()] to close.');
+    }
+
     final Completer<bool> completer = Completer();
     final bool opened = _statusOfSheet.value;
 
@@ -105,7 +114,9 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
       }
 
       if (context.mounted) {
-        Navigator.of(context).pop(true);
+        Navigator.of(context).removeRoute(
+          associatedRoute,
+        );
       }
 
       _statusOfSheet.value = false;

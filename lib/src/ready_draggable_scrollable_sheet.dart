@@ -147,11 +147,11 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (status) {
-        if (status) return; // Already closed.
+      onPopInvoked: (status) async {
+        if (_closing || status) return; // Closing or already closed.
 
         if (widget.controller.attached) {
-          widget.controller.close(context);
+          await widget.controller.close(context);
         }
       },
       child: DeferredPointerHandler(
@@ -191,6 +191,8 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
                       child: NotificationListener<DraggableScrollableNotification>(
                         onNotification: (DraggableScrollableNotification notification) {
                           // NOTE: Do not return "true", to listen to the notifications next times the sheet is opened. (maintainState is true)
+
+                          // TODO: Simultaneously adjusting the degree of transparency of the barrier according to the position of the sheet.
 
                           if (notification.depth != 0) return false;
 
