@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:ready_draggable_sheet/src/ready_draggable_scrollable_sheet.dart';
 import 'dart:ui' show PlatformDispatcher;
+import 'package:flutter/material.dart';
+
 import '../ready_draggable_sheet.dart';
-import 'components/RHorizontalSeparator.dart';
+import 'components/HorizontalSeparator.dart';
 
 class ReadyDraggableScrollableSheetContainer {
   final ReadyDraggableScrollableSheetController controller;
@@ -59,6 +59,7 @@ class ReadyDraggableScrollableSheetContainer {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           horizontalSeparatorWidget = horizontalSeparatorKey.currentWidget!;
           horizontalSeparatorSize = (horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size;
+
           if (header != null) {
             headerWidget = headerKey.currentWidget!;
             headerSize = (headerKey.currentContext!.findRenderObject() as RenderBox).size;
@@ -85,7 +86,7 @@ class ReadyDraggableScrollableSheetContainer {
                       // Horizontal separator (Top or bottom drag bar).
                       IntrinsicHeight(
                         key: horizontalSeparatorKey,
-                        child: const RHorizontalSeparator(),
+                        child: const HorizontalSeparator(),
                       ),
                       // Header
                       if (header != null)
@@ -119,6 +120,8 @@ class ReadyDraggableScrollableSheetContainer {
         builder: (BuildContext context) {
           double sheetHeight = 0.0;
 
+          // - All (_Size) equals null when [fixedHeight] is set -
+
           if (horizontalSeparatorSize != null) {
             sheetHeight += horizontalSeparatorSize!.height;
           }
@@ -128,6 +131,8 @@ class ReadyDraggableScrollableSheetContainer {
           if (contentSize != null) {
             sheetHeight += contentSize!.height;
           }
+
+          final Widget horizontalSeparator = (horizontalSeparatorWidget ?? const HorizontalSeparator());
 
           return ReadyDraggableScrollableSheet(
             controller: controller,
@@ -140,7 +145,7 @@ class ReadyDraggableScrollableSheetContainer {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Horizontal separator.
-                    if (!openFromTop) horizontalSeparatorWidget!,
+                    if (!openFromTop) horizontalSeparator,
 
                     // Header
                     if (headerWidget != null) headerWidget!,
@@ -149,7 +154,7 @@ class ReadyDraggableScrollableSheetContainer {
                     contentWidget!,
 
                     // Bottom drag bar.
-                    if (openFromTop) horizontalSeparatorWidget!,
+                    if (openFromTop) horizontalSeparator,
                   ],
                 ),
               );
@@ -207,7 +212,10 @@ class ReadyDraggableScrollableSheetContainer {
 
   Future<void> dispose() async {
     if (context.mounted) {
-      await controller.maybeClose(context, immediately: true,);
+      await controller.maybeClose(
+        context,
+        immediately: true,
+      );
     }
 
     _overlayEntry.dispose();

@@ -62,7 +62,7 @@ class _ExampleState extends State<Example> {
                     Flexible(
                       child: ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: numbers.length,
                         itemBuilder: (BuildContext context, int index) {
                           return ListTile(
@@ -93,7 +93,7 @@ class _ExampleState extends State<Example> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('RDS Sheet'),
+          title: const Text('RDS Sheet'),
         ),
         body: Container(
           child: Column(
@@ -101,17 +101,17 @@ class _ExampleState extends State<Example> {
               // Favorites
               ElevatedButton(
                 onPressed: () => (!_favoriteSheetController.open_ ? _favoriteSheetController.open() : _favoriteSheetController.close(context)),
-                child: Text('Favorites sheet'),
+                child: const Text('Favorites sheet'),
               ),
 
               // Open Settings route.
               ElevatedButton(
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (BuildContext context) => Settings(),
+                    builder: (BuildContext context) => const Settings(),
                   ),
                 ),
-                child: Text('Open Settings route'),
+                child: const Text('Open Settings route'),
               ),
             ],
           ),
@@ -144,6 +144,11 @@ class _SettingsState extends State<Settings> {
         context: context,
         controller: _settingsSheetController,
         withBarrier: false,
+        header: Row(
+          children: [
+            Text('Header'),
+          ],
+        ),
         content: <Flexible>[
           Flexible(
             child: Builder(
@@ -160,7 +165,7 @@ class _SettingsState extends State<Settings> {
                     Flexible(
                       child: ListView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         itemCount: numbers.length,
                         itemBuilder: (BuildContext context, int index) {
                           return ListTile(
@@ -191,7 +196,7 @@ class _SettingsState extends State<Settings> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Settings'),
+          title: const Text('Settings'),
         ),
         body: Container(
           child: Column(
@@ -199,7 +204,7 @@ class _SettingsState extends State<Settings> {
               // Favorites
               ElevatedButton(
                 onPressed: () => (!_settingsSheetController.open_ ? _settingsSheetController.open() : _settingsSheetController.close(context)),
-                child: Text('Settings sheet'),
+                child: const Text('Settings sheet'),
               ),
             ],
           ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class RHorizontalSeparator extends StatelessWidget {
+class HorizontalSeparator extends StatelessWidget {
   final EdgeInsets padding;
   final double thickness;
   final Color? color;
 
-  const RHorizontalSeparator({
+  const HorizontalSeparator({
     super.key,
     this.padding = const EdgeInsets.symmetric(
       vertical: 5.0,
