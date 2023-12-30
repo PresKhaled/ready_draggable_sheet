@@ -5,8 +5,8 @@ import '../ready_draggable_sheet.dart';
 import 'components/HorizontalSeparator.dart';
 
 class ReadyDraggableScrollableSheetContainer {
+  final ValueNotifier<BuildContext> contextReference;
   final ReadyDraggableScrollableSheetController controller;
-  final BuildContext context;
   final double? fixedHeight;
   final Widget? header;
   final EdgeInsets contentMargin;
@@ -29,9 +29,9 @@ class ReadyDraggableScrollableSheetContainer {
   final ValueNotifier<bool> _contentOfOverlayEntryIsProcessed = ValueNotifier<bool>(false);
 
   ReadyDraggableScrollableSheetContainer({
+    required this.contextReference,
     required this.controller,
     this.fixedHeight,
-    required this.context,
     this.header,
     this.contentMargin = EdgeInsets.zero,
     required this.content,
@@ -47,6 +47,7 @@ class ReadyDraggableScrollableSheetContainer {
   })  : assert(initialChildSize >= 0.0 && initialChildSize <= 1.0),
         assert(minChildSize >= 0.0 && minChildSize <= 1.0) {
     /////////////////////////////
+    final BuildContext context = contextReference.value;
     Widget? horizontalSeparatorWidget, headerWidget, contentWidget;
     Size? horizontalSeparatorSize, headerSize, contentSize;
     final Widget contentContainer = Padding(
@@ -207,7 +208,7 @@ class ReadyDraggableScrollableSheetContainer {
       if (fixedHeight == null) {
         _contentOfOverlayEntryIsProcessed.addListener(listener);
 
-        Overlay.of(context).insert(_overlayEntry);
+        Overlay.of(context, rootOverlay: true).insert(_overlayEntry);
       } else {
         push_();
       }
@@ -221,6 +222,8 @@ class ReadyDraggableScrollableSheetContainer {
   }
 
   Future<void> dispose() async {
+    final BuildContext context = contextReference.value;
+
     if (context.mounted) {
       await controller.maybeClose(
         context,
