@@ -144,6 +144,7 @@ class _SettingsState extends State<Settings> {
         context: context,
         controller: _settingsSheetController,
         withBarrier: false,
+        fixedHeight: MediaQuery.of(context).size.height,
         header: Row(
           children: [
             Text('Header'),

@@ -49,6 +49,14 @@ class ReadyDraggableScrollableSheetContainer {
     /////////////////////////////
     Widget? horizontalSeparatorWidget, headerWidget, contentWidget;
     Size? horizontalSeparatorSize, headerSize, contentSize;
+    final Widget contentContainer = Padding(
+      padding: contentMargin,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: content,
+      ),
+    );
 
     // Used to calculate the sizes of the sheet parts (widgets).
     _overlayEntry = OverlayEntry(
@@ -97,11 +105,7 @@ class ReadyDraggableScrollableSheetContainer {
                       // Content
                       Flexible(
                         key: contentKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: content,
-                        ),
+                        child: contentContainer,
                       ),
                     ],
                   ),
@@ -140,22 +144,28 @@ class ReadyDraggableScrollableSheetContainer {
             builder: (BuildContext context, ScrollController scrollController) {
               return SingleChildScrollView(
                 controller: scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Horizontal separator.
-                    if (!openFromTop) horizontalSeparator,
+                child: SizedBox(
+                  height: fixedHeight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: ((fixedHeight == null) ? MainAxisSize.min : MainAxisSize.max), // Shrink/Fill
+                    children: [
+                      // Horizontal separator.
+                      if (!openFromTop) horizontalSeparator,
 
-                    // Header
-                    if (headerWidget != null) headerWidget!,
+                      // Header
+                      if (headerWidget != null) headerWidget!,
 
-                    // Content
-                    contentWidget!,
+                      // Content
+                      (contentWidget ??
+                          Expanded(
+                            child: contentContainer,
+                          )),
 
-                    // Bottom drag bar.
-                    if (openFromTop) horizontalSeparator,
-                  ],
+                      // Bottom drag bar.
+                      if (openFromTop) horizontalSeparator,
+                    ],
+                  ),
                 ),
               );
             },
