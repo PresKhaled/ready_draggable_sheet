@@ -46,6 +46,7 @@ class _ExampleState extends State<Example> {
       _favoriteSheet = ReadyDraggableScrollableSheetContainer(
         context: context,
         controller: _favoriteSheetController,
+        openFromTop: true,
         content: <Flexible>[
           Flexible(
             child: Builder(

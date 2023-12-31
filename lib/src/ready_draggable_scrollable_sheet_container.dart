@@ -144,27 +144,30 @@ class ReadyDraggableScrollableSheetContainer {
             builder: (BuildContext context, ScrollController scrollController) {
               return SingleChildScrollView(
                 controller: scrollController,
-                child: SizedBox(
-                  height: fixedHeight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: ((fixedHeight == null) ? MainAxisSize.min : MainAxisSize.max), // Shrink/Fill
-                    children: [
-                      // Horizontal separator.
-                      if (!openFromTop) horizontalSeparator,
+                child: RotatedBox(
+                  quarterTurns: (openFromTop ? 2 : 0),
+                  child: SizedBox(
+                    height: fixedHeight,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: ((fixedHeight == null) ? MainAxisSize.min : MainAxisSize.max), // Shrink/Fill
+                      children: [
+                        // Horizontal separator.
+                        if (!openFromTop) horizontalSeparator,
 
-                      // Header
-                      if (headerWidget != null) headerWidget!,
+                        // Header
+                        if (headerWidget != null) headerWidget!,
 
-                      // Content
-                      (contentWidget ??
-                          Expanded(
-                            child: contentContainer,
-                          )),
+                        // Content
+                        (contentWidget ??
+                            Expanded(
+                              child: contentContainer,
+                            )),
 
-                      // Bottom drag bar.
-                      if (openFromTop) horizontalSeparator,
-                    ],
+                        // Bottom drag bar.
+                        if (openFromTop) horizontalSeparator,
+                      ],
+                    ),
                   ),
                 ),
               );

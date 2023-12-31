@@ -235,15 +235,10 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
                                         )
                                       : BorderSide.none),
                                   borderRadius: (widget.borderRadius ??
-                                      (!widget.openFromTop
-                                          ? const BorderRadius.only(
-                                              topRight: borderRadiusCorner,
-                                              topLeft: borderRadiusCorner,
-                                            )
-                                          : const BorderRadius.only(
-                                              bottomRight: borderRadiusCorner,
-                                              bottomLeft: borderRadiusCorner,
-                                            ))),
+                                      const BorderRadius.only(
+                                        topRight: borderRadiusCorner,
+                                        topLeft: borderRadiusCorner,
+                                      )),
                                 ),
                                 color: (passedColors?['background-color'] ?? themeData.colorScheme.surfaceVariant),
                                 child: Scaffold(
