@@ -31,7 +31,6 @@ class Example extends StatefulWidget {
 }
 
 class _ExampleState extends State<Example> {
-  late final ValueNotifier<BuildContext> _contextReference = ValueNotifier<BuildContext>(context);
   ReadyDraggableScrollableSheetContainer? _favoriteSheet;
   final ReadyDraggableScrollableSheetController _favoriteSheetController = ReadyDraggableScrollableSheetController(
     label: 'Favorite',
@@ -45,7 +44,7 @@ class _ExampleState extends State<Example> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Favorite
       _favoriteSheet = ReadyDraggableScrollableSheetContainer(
-        contextReference: _contextReference,
+        context: context,
         controller: _favoriteSheetController,
         content: <Flexible>[
           Flexible(
@@ -91,8 +90,6 @@ class _ExampleState extends State<Example> {
 
   @override
   Widget build(BuildContext context) {
-    _contextReference.value = context;
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -132,7 +129,6 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  late final ValueNotifier<BuildContext> _contextReference = ValueNotifier<BuildContext>(context);
   ReadyDraggableScrollableSheetContainer? _settingsSheet;
   final ReadyDraggableScrollableSheetController _settingsSheetController = ReadyDraggableScrollableSheetController(
     label: 'Settings',
@@ -145,7 +141,7 @@ class _SettingsState extends State<Settings> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Settings
       _settingsSheet = ReadyDraggableScrollableSheetContainer(
-        contextReference: _contextReference,
+        context: context,
         controller: _settingsSheetController,
         withBarrier: false,
         fixedHeight: MediaQuery.of(context).size.height,
@@ -198,8 +194,6 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    _contextReference.value = context;
-
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
