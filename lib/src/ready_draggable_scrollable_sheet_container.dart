@@ -6,7 +6,7 @@ import 'components/HorizontalSeparator.dart';
 
 class ReadyDraggableScrollableSheetContainer {
   final ReadyDraggableScrollableSheetController controller;
-  final BuildContext context;
+  // final BuildContext context;
   final double? fixedHeight;
   final Widget? header;
   final EdgeInsets contentMargin;
@@ -31,7 +31,7 @@ class ReadyDraggableScrollableSheetContainer {
   ReadyDraggableScrollableSheetContainer({
     required this.controller,
     this.fixedHeight,
-    required this.context,
+    // required this.context,
     this.header,
     this.contentMargin = EdgeInsets.zero,
     required this.content,
@@ -185,12 +185,14 @@ class ReadyDraggableScrollableSheetContainer {
           );
         },
         withBarrier: withBarrier,
-        onBarrierTapped: () => controller.close(context),
+        onBarrierTapped: () => controller.close(),
       );
 
       controller.associateRoute = route; // Mandatory
 
-      Navigator.of(context).push(route);
+      Navigator.of(
+        ReadyDraggableScrollablePreferences.contextReference_!.value,
+      ).push(route);
     }
 
     void open_() {
@@ -210,7 +212,9 @@ class ReadyDraggableScrollableSheetContainer {
       if (fixedHeight == null) {
         _contentOfOverlayEntryIsProcessed.addListener(listener);
 
-        Overlay.of(context).insert(_overlayEntry);
+        Overlay.of(
+          ReadyDraggableScrollablePreferences.contextReference_!.value,
+        ).insert(_overlayEntry);
       } else {
         push_();
       }
@@ -224,12 +228,9 @@ class ReadyDraggableScrollableSheetContainer {
   }
 
   Future<void> dispose() async {
-    if (context.mounted) {
-      await controller.maybeClose(
-        context,
-        immediately: true,
-      );
-    }
+    await controller.maybeClose(
+      immediately: true,
+    );
 
     _overlayEntry.dispose();
     controller.dispose();

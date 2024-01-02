@@ -151,7 +151,7 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
         if (_closing || status) return; // Closing or already closed.
 
         if (widget.controller.attached) {
-          await widget.controller.close(context);
+          await widget.controller.close();
         }
       },
       child: DeferredPointerHandler(
@@ -201,7 +201,7 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
 
                           // Close the sheet when swiping down (by the app or user) completely.
                           if ((notification.extent <= 0 || notification.extent <= precisionErrorTolerance) && !_closing) {
-                            widget.controller.close(context);
+                            widget.controller.close();
                           }
 
                           return false;

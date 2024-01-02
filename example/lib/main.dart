@@ -5,8 +5,24 @@ void main() {
   runApp(const Root());
 }
 
-class Root extends StatelessWidget {
+class Root extends StatefulWidget {
   const Root({super.key});
+
+  @override
+  State<Root> createState() => _RootState();
+}
+
+class _RootState extends State<Root> {
+  late final ValueNotifier<BuildContext> _contextReference = ValueNotifier<BuildContext>(context);
+
+  @override
+  void initState() {
+    super.initState();
+
+    ReadyDraggableScrollablePreferences(
+      contextReference: _contextReference,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +34,13 @@ class Root extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const Example(),
+      home: Builder(
+        builder: (BuildContext context) {
+          _contextReference.value = context;
+
+          return const Example();
+        },
+      ),
     );
   }
 }
@@ -44,7 +66,7 @@ class _ExampleState extends State<Example> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Favorite
       _favoriteSheet = ReadyDraggableScrollableSheetContainer(
-        context: context,
+        // context: context,
         controller: _favoriteSheetController,
         openFromTop: true,
         content: <Flexible>[
@@ -96,26 +118,24 @@ class _ExampleState extends State<Example> {
         appBar: AppBar(
           title: const Text('RDS Sheet'),
         ),
-        body: Container(
-          child: Column(
-            children: [
-              // Favorites
-              ElevatedButton(
-                onPressed: () => (!_favoriteSheetController.open_ ? _favoriteSheetController.open() : _favoriteSheetController.close(context)),
-                child: const Text('Favorites sheet'),
-              ),
+        body: Column(
+          children: [
+            // Favorites
+            ElevatedButton(
+              onPressed: () => (!_favoriteSheetController.open_ ? _favoriteSheetController.open() : _favoriteSheetController.close()),
+              child: const Text('Favorites sheet'),
+            ),
 
-              // Open Settings route.
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => const Settings(),
-                  ),
+            // Open Settings route.
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) => const Settings(),
                 ),
-                child: const Text('Open Settings route'),
               ),
-            ],
-          ),
+              child: const Text('Open Settings route'),
+            ),
+          ],
         ),
       ),
     );
@@ -142,11 +162,12 @@ class _SettingsState extends State<Settings> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Settings
       _settingsSheet = ReadyDraggableScrollableSheetContainer(
-        context: context,
+        // context: context,
         controller: _settingsSheetController,
         withBarrier: false,
         fixedHeight: MediaQuery.of(context).size.height,
-        header: Row(
+        header: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('Header'),
           ],
@@ -200,16 +221,14 @@ class _SettingsState extends State<Settings> {
         appBar: AppBar(
           title: const Text('Settings'),
         ),
-        body: Container(
-          child: Column(
-            children: [
-              // Favorites
-              ElevatedButton(
-                onPressed: () => (!_settingsSheetController.open_ ? _settingsSheetController.open() : _settingsSheetController.close(context)),
-                child: const Text('Settings sheet'),
-              ),
-            ],
-          ),
+        body: Column(
+          children: [
+            // Favorites
+            ElevatedButton(
+              onPressed: () => (!_settingsSheetController.open_ ? _settingsSheetController.open() : _settingsSheetController.close()),
+              child: const Text('Settings sheet'),
+            ),
+          ],
         ),
       ),
     );

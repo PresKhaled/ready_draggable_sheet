@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../ready_draggable_sheet.dart';
+
 class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   final String? label;
   final String? routeName;
@@ -79,8 +81,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     return true; // Signal
   }
 
-  Future<bool> close(
-    BuildContext context, {
+  Future<bool> close({
     bool immediately = false,
   }) async {
     _ensureNotDisposed();
@@ -113,11 +114,11 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
         await completer.future;
       }
 
-      if (context.mounted) {
-        Navigator.of(context).removeRoute(
-          associatedRoute,
-        );
-      }
+      Navigator.of(
+        ReadyDraggableScrollablePreferences.contextReference_!.value,
+      ).removeRoute(
+        associatedRoute,
+      );
 
       _statusOfSheet.value = false;
       sheetClosingSignal.value = false;
@@ -129,17 +130,13 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     throw Exception('The [ReadyDraggableScrollableSheet#$label] must be open to be closed.');
   }
 
-  Future<bool> maybeClose(
-    BuildContext context, {
+  Future<bool> maybeClose({
     bool immediately = false,
   }) async {
     _ensureNotDisposed();
 
     if (open_) {
-      return await close(
-        context,
-        immediately: immediately,
-      );
+      return await close(immediately: immediately);
     }
 
     return false;
