@@ -25,7 +25,7 @@ class ReadyDraggableScrollableSheetContainer {
   final Map<String, Color> Function()? colors;
   final void Function()? onClosed;
   ////////////////////////////////////////
-  late final OverlayEntry _overlayEntry;
+  late OverlayEntry _contentOverlayEntry;
   final ValueNotifier<bool> _contentOfOverlayEntryIsProcessed = ValueNotifier<bool>(false);
 
   ReadyDraggableScrollableSheetContainer({
@@ -58,64 +58,68 @@ class ReadyDraggableScrollableSheetContainer {
       ),
     );
 
-    // Used to calculate the sizes of the sheet parts (widgets).
-    _overlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
-        final GlobalKey horizontalSeparatorKey = GlobalKey(), headerKey = GlobalKey(), contentKey = GlobalKey();
-        final double screenHeight = MediaQueryData.fromView(PlatformDispatcher.instance.implicitView!).size.height; // MediaQuery.of(context).size.height;
+    /// Used to calculate the sizes of the sheet parts (widgets).
+    OverlayEntry getContentEntry() {
+      return OverlayEntry(
+        builder: (BuildContext context) {
+          final GlobalKey horizontalSeparatorKey = GlobalKey(), headerKey = GlobalKey(), contentKey = GlobalKey();
+          final double screenHeight = MediaQueryData.fromView(PlatformDispatcher.instance.implicitView!).size.height; // MediaQuery.of(context).size.height;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          horizontalSeparatorWidget = horizontalSeparatorKey.currentWidget!;
-          horizontalSeparatorSize = (horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            horizontalSeparatorWidget = horizontalSeparatorKey.currentWidget!;
+            horizontalSeparatorSize = (horizontalSeparatorKey.currentContext!.findRenderObject() as RenderBox).size;
 
-          if (header != null) {
-            headerWidget = headerKey.currentWidget!;
-            headerSize = (headerKey.currentContext!.findRenderObject() as RenderBox).size;
-          }
+            if (header != null) {
+              headerWidget = headerKey.currentWidget!;
+              headerSize = (headerKey.currentContext!.findRenderObject() as RenderBox).size;
+            }
 
-          contentWidget = contentKey.currentWidget!;
-          contentSize = (contentKey.currentContext!.findRenderObject() as RenderBox).size;
+            contentWidget = contentKey.currentWidget!;
+            contentSize = (contentKey.currentContext!.findRenderObject() as RenderBox).size;
 
-          _contentOfOverlayEntryIsProcessed.value = true;
-        });
+            _contentOfOverlayEntryIsProcessed.value = true;
+          });
 
-        return SafeArea(
-          child: Transform.translate(
-            offset: Offset(0, screenHeight), // Hide from the visible area of the screen.
-            child: Scaffold(
-              body: SizedBox(
-                height: screenHeight,
-                child: SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Horizontal separator (Top or bottom drag bar).
-                      IntrinsicHeight(
-                        key: horizontalSeparatorKey,
-                        child: const HorizontalSeparator(),
-                      ),
-                      // Header
-                      if (header != null)
+          return SafeArea(
+            child: Transform.translate(
+              offset: Offset(0, screenHeight), // Hide from the visible area of the screen.
+              child: Scaffold(
+                body: SizedBox(
+                  height: screenHeight,
+                  child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Horizontal separator (Top or bottom drag bar).
                         IntrinsicHeight(
-                          key: headerKey,
-                          child: header!,
+                          key: horizontalSeparatorKey,
+                          child: const HorizontalSeparator(),
                         ),
-                      // Content
-                      Flexible(
-                        key: contentKey,
-                        child: contentContainer,
-                      ),
-                    ],
+                        // Header
+                        if (header != null)
+                          IntrinsicHeight(
+                            key: headerKey,
+                            child: header!,
+                          ),
+                        // Content
+                        Flexible(
+                          key: contentKey,
+                          child: contentContainer,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
+
+    _contentOverlayEntry = getContentEntry();
 
     void push_() {
       final ReadyDraggableScrollableSheetRoute route = ReadyDraggableScrollableSheetRoute(
@@ -200,7 +204,7 @@ class ReadyDraggableScrollableSheetContainer {
 
       listener = () {
         if (_contentOfOverlayEntryIsProcessed.value) {
-          _overlayEntry.remove();
+          _contentOverlayEntry.remove();
 
           push_();
 
@@ -212,9 +216,11 @@ class ReadyDraggableScrollableSheetContainer {
       if (fixedHeight == null) {
         _contentOfOverlayEntryIsProcessed.addListener(listener);
 
+        _contentOverlayEntry = getContentEntry();
+
         Overlay.of(
           ReadyDraggableScrollablePreferences.contextReference_!.value,
-        ).insert(_overlayEntry);
+        ).insert(_contentOverlayEntry);
       } else {
         push_();
       }
@@ -223,16 +229,26 @@ class ReadyDraggableScrollableSheetContainer {
     controller.statusOfSheet.addListener(() {
       final bool statusOfSheet = controller.statusOfSheet.value;
 
-      if (statusOfSheet) open_(); // Open
+      // Open
+      if (statusOfSheet) {
+        open_();
+      } else {
+        // Close
+        if (_contentOverlayEntry.mounted) {
+          _contentOverlayEntry.dispose();
+        }
+      }
     });
   }
 
   Future<void> dispose() async {
+    return;
+
     await controller.maybeClose(
       immediately: true,
     );
 
-    _overlayEntry.dispose();
+    // _overlayEntry.dispose();
     controller.dispose();
   }
 }
