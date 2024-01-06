@@ -85,6 +85,7 @@ class ReadyDraggableScrollableSheetContainer {
               offset: Offset(0, screenHeight), // Hide from the visible area of the screen.
               child: Scaffold(
                 body: SizedBox(
+                  width: ((ReadyDraggableScrollablePreferences.getWidth_ != null) ? ReadyDraggableScrollablePreferences.getWidth_!(context) : null),
                   height: screenHeight,
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
@@ -144,6 +145,7 @@ class ReadyDraggableScrollableSheetContainer {
 
           return ReadyDraggableScrollableSheet(
             controller: controller,
+            width: ((ReadyDraggableScrollablePreferences.getWidth_ != null) ? ReadyDraggableScrollablePreferences.getWidth_!(context) : null),
             height: (fixedHeight ?? sheetHeight),
             builder: (BuildContext context, ScrollController scrollController) {
               return SingleChildScrollView(

@@ -1,3 +1,4 @@
+import 'package:example/screen_breakpoints.dart';
 import 'package:flutter/material.dart';
 import 'package:ready_draggable_sheet/ready_draggable_sheet.dart';
 
@@ -12,7 +13,7 @@ class Root extends StatefulWidget {
   State<Root> createState() => _RootState();
 }
 
-class _RootState extends State<Root> {
+class _RootState extends State<Root> with ScreenBreakpoints {
   late final ValueNotifier<BuildContext> _contextReference = ValueNotifier<BuildContext>(context);
 
   @override
@@ -21,6 +22,7 @@ class _RootState extends State<Root> {
 
     ReadyDraggableScrollablePreferences(
       contextReference: _contextReference,
+      getWidth: (BuildContext context) => super.getMainContentWidth(context),
     );
   }
 
