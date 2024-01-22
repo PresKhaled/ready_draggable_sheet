@@ -4,8 +4,9 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
   final Widget Function(BuildContext context) builder;
   final bool withBarrier;
   final VoidCallback? onBarrierTapped;
-  late final bool _maintainState;
+
   late final bool _opaque;
+  late final bool _maintainState;
   late final String? _barrierLabel;
   late final bool _barrierDismissible;
   late final Color? _barrierColor;
@@ -15,7 +16,7 @@ class ReadyDraggableScrollableSheetRoute<T> extends ModalRoute<T> {
     super.filter,
     super.traversalEdgeBehavior,
     bool maintainState = true,
-    bool opaque = true,
+    bool opaque = false,
     required this.builder,
     this.withBarrier = true,
     this.onBarrierTapped,

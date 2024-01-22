@@ -9,7 +9,7 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   final String? routeName;
   final ValueNotifier<DraggableScrollableController?> draggableScrollableController = ValueNotifier<DraggableScrollableController?>(null);
   final ValueNotifier<double?> currentSheetPixels = ValueNotifier<double?>(null);
-  final ValueNotifier<bool?> sheetIsBeingOpened = ValueNotifier<bool?>(null);
+  final ValueNotifier<bool?> sheetIsBeingOpen = ValueNotifier<bool?>(null);
   final ValueNotifier<bool?> sheetIsBeingClosed = ValueNotifier<bool?>(null);
   final ValueNotifier<bool> sheetClosingSignal = ValueNotifier<bool>(false);
   final ValueNotifier<Route?> _associatedRoute = ValueNotifier<Route?>(null);
@@ -31,6 +31,8 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   Future<bool> open() async {
     _ensureNotDisposed();
 
+    if (sheetIsBeingOpen.value == true) return false; // Opening
+
     final Completer<bool> completer = Completer();
     final bool opened = _statusOfSheet.value;
 
@@ -38,14 +40,14 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
       late final VoidCallback listener;
 
       listener = () {
-        if (sheetIsBeingOpened.value == false) {
+        if (sheetIsBeingOpen.value == false) {
           completer.complete(true); // Opened
 
-          sheetIsBeingOpened.removeListener(listener);
+          sheetIsBeingOpen.removeListener(listener);
         }
       };
 
-      sheetIsBeingOpened.addListener(listener);
+      sheetIsBeingOpen.addListener(listener);
       _statusOfSheet.value = true;
       notifyListeners();
 
@@ -86,6 +88,8 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
   }) async {
     _ensureNotDisposed();
 
+    if (sheetIsBeingClosed.value == true) return false; // Closing
+
     final Route? associatedRoute = _associatedRoute.value;
 
     if (associatedRoute == null) {
@@ -114,9 +118,9 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
         await completer.future;
       }
 
-      Navigator.of(
-        ReadyDraggableScrollablePreferences.contextReference_!.value,
-      ).removeRoute(
+      if (!ReadyDraggableScrollablePreferences.context.mounted) return false; // Signal
+
+      Navigator.of(ReadyDraggableScrollablePreferences.context).removeRoute(
         associatedRoute,
       );
 
@@ -142,6 +146,18 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> toggle() async {
+    if (sheetIsBeingOpen.value == true || sheetIsBeingClosed.value == true) {
+      return false; // Signal
+    }
+
+    if (!open_) {
+      return await open();
+    }
+
+    return await close();
+  }
+
   void _ensureNotDisposed() {
     if (_disposed) throw Exception('This controller cannot be used after [dispose()] has been performed.');
   }
@@ -152,8 +168,9 @@ class ReadyDraggableScrollableSheetController extends ChangeNotifier {
 
     _disposed = true;
 
-    sheetIsBeingOpened.value = null;
+    sheetIsBeingOpen.value = null;
     sheetIsBeingClosed.value = null;
+
     draggableScrollableController.value?.dispose();
     draggableScrollableController.value = null;
   }

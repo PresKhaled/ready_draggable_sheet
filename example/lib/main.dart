@@ -16,15 +16,10 @@ class Root extends StatefulWidget {
 class _RootState extends State<Root> with ScreenBreakpoints {
   late final ValueNotifier<BuildContext> _contextReference = ValueNotifier<BuildContext>(context);
 
-  @override
+  /*@override
   void initState() {
     super.initState();
-
-    ReadyDraggableScrollablePreferences(
-      contextReference: _contextReference,
-      getWidth: (BuildContext context) => super.getMainContentWidth(context),
-    );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +33,8 @@ class _RootState extends State<Root> with ScreenBreakpoints {
       ),
       home: Builder(
         builder: (BuildContext context) {
-          _contextReference.value = context;
+          ReadyDraggableScrollablePreferences.context = context;
+          ReadyDraggableScrollablePreferences.getWidth = () => super.getMainContentWidth(context);
 
           return const Example();
         },
@@ -55,62 +51,59 @@ class Example extends StatefulWidget {
 }
 
 class _ExampleState extends State<Example> {
-  ReadyDraggableScrollableSheetContainer? _favoriteSheet;
   final ReadyDraggableScrollableSheetController _favoriteSheetController = ReadyDraggableScrollableSheetController(
     label: 'Favorite',
     routeName: 'RDS_Favorite',
   );
+  late final ReadyDraggableScrollableSheetContainer _favoriteSheet;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Favorite
-      _favoriteSheet = ReadyDraggableScrollableSheetContainer(
-        // context: context,
-        controller: _favoriteSheetController,
-        openFromTop: true,
-        content: <Flexible>[
-          Flexible(
-            child: Builder(
-              builder: (BuildContext context) {
-                final List<int> numbers = List.generate(
-                  11,
-                  (int index) => (index + 1),
-                );
+    _favoriteSheet = ReadyDraggableScrollableSheetContainer(
+      // context: context,
+      controller: _favoriteSheetController,
+      openFromTop: true,
+      content: <Flexible>[
+        Flexible(
+          child: Builder(
+            builder: (BuildContext context) {
+              final List<int> numbers = List.generate(
+                11,
+                (int index) => (index + 1),
+              );
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: numbers.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ListTile(
-                            title: Text('Favorite item no. ${numbers[index]}'),
-                          );
-                        },
-                      ),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: numbers.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                          title: Text('Favorite item no. ${numbers[index]}'),
+                        );
+                      },
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
-        ],
-      );
-    });
+        ),
+      ],
+    );
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    _favoriteSheet?.dispose();
+    _favoriteSheet.dispose();
   }
 
   @override
@@ -124,7 +117,9 @@ class _ExampleState extends State<Example> {
           children: [
             // Favorites
             ElevatedButton(
-              onPressed: () => (!_favoriteSheetController.open_ ? _favoriteSheetController.open() : _favoriteSheetController.close()),
+              onPressed: () {
+                _favoriteSheetController.toggle();
+              },
               child: const Text('Favorites sheet'),
             ),
 

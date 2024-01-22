@@ -23,6 +23,7 @@ class ReadyDraggableScrollableSheet extends StatefulWidget {
   final bool withLinearSeparator;
   final BorderRadius? borderRadius;
   final Map<String, Color> Function()? colors;
+  final void Function(double maxHeight, double pixels)? onDragged;
   final VoidCallback? onClosed;
 
   const ReadyDraggableScrollableSheet({
@@ -40,6 +41,7 @@ class ReadyDraggableScrollableSheet extends StatefulWidget {
     this.withLinearSeparator = false,
     this.colors,
     this.borderRadius,
+    this.onDragged,
     this.onClosed,
   })  : assert(initialChildSize >= 0.0 && initialChildSize <= 1.0),
         assert(minChildSize >= 0.0 && minChildSize <= 1.0);
@@ -56,6 +58,7 @@ class ReadyDraggableScrollableSheet extends StatefulWidget {
 
 class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollableSheet> with TickerProviderStateMixin {
   late final DraggableScrollableController draggableScrollableController = DraggableScrollableController();
+  VoidCallback? _draggableScrollableControllerListener;
   final GlobalKey _scaffoldKey = GlobalKey();
   double height = 0.0;
   late final AnimationController _animationControllerTranslate; // Open/Close
@@ -98,13 +101,13 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
       // print(status);
 
       if (status == AnimationStatus.forward) {
-        widget.controller.sheetIsBeingOpened.value = true;
+        widget.controller.sheetIsBeingOpen.value = true;
       } else if (status == AnimationStatus.reverse) {
         widget.controller.sheetIsBeingClosed.value = true;
       }
 
       if (status == AnimationStatus.completed) {
-        widget.controller.sheetIsBeingOpened.value = false; // Complete
+        widget.controller.sheetIsBeingOpen.value = false; // Complete
       } else if (status == AnimationStatus.dismissed) {
         widget.controller.sheetIsBeingClosed.value = false; // Complete
       }
@@ -137,6 +140,10 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
 
     // [!_closing] = The sheet closes immediately.
     if (widget.onClosed != null && !_closing) widget.onClosed!();
+
+    if (_draggableScrollableControllerListener != null) {
+      draggableScrollableController.removeListener(_draggableScrollableControllerListener!);
+    }
 
     super.dispose(); // NOTE: Leave it at the end.
   }
@@ -192,8 +199,6 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
                         onNotification: (DraggableScrollableNotification notification) {
                           // NOTE: Do not return "true", to listen to the notifications next times the sheet is opened. (maintainState is true)
 
-                          // TODO: Simultaneously adjusting the degree of transparency of the barrier according to the position of the sheet.
-
                           if (notification.depth != 0) return false;
 
                           widget.controller.currentSheetPixels.value = (notification.extent * height);
@@ -221,6 +226,18 @@ class _ReadyDraggableScrollableSheetState extends State<ReadyDraggableScrollable
                             const Radius borderRadiusCorner = Radius.circular(12.0);
                             final Map<String, Color>? passedColors = ((widget.colors != null) ? widget.colors!() : null);
                             final Color foregroundColor = (passedColors?['foreground-color'] ?? themeData.colorScheme.onSurfaceVariant);
+
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              final double maxHeight = (context.findRenderObject() as RenderBox).size.height;
+
+                              if (widget.onDragged != null) {
+                                _draggableScrollableControllerListener = () {
+                                  widget.onDragged!(maxHeight, draggableScrollableController.pixels);
+                                };
+
+                                draggableScrollableController.addListener(_draggableScrollableControllerListener!);
+                              }
+                            });
 
                             return DeferPointer(
                               link: _deferredPointerHandlerLink,

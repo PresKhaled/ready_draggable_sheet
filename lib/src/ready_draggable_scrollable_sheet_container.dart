@@ -6,7 +6,6 @@ import 'components/HorizontalSeparator.dart';
 
 class ReadyDraggableScrollableSheetContainer {
   final ReadyDraggableScrollableSheetController controller;
-  // final BuildContext context;
   final double? fixedHeight;
   final Widget? header;
   final EdgeInsets contentMargin;
@@ -31,7 +30,6 @@ class ReadyDraggableScrollableSheetContainer {
   ReadyDraggableScrollableSheetContainer({
     required this.controller,
     this.fixedHeight,
-    // required this.context,
     this.header,
     this.contentMargin = EdgeInsets.zero,
     required this.content,
@@ -85,7 +83,7 @@ class ReadyDraggableScrollableSheetContainer {
               offset: Offset(0, screenHeight), // Hide from the visible area of the screen.
               child: Scaffold(
                 body: SizedBox(
-                  width: ((ReadyDraggableScrollablePreferences.getWidth_ != null) ? ReadyDraggableScrollablePreferences.getWidth_!(context) : null),
+                  width: ((ReadyDraggableScrollablePreferences.getWidth != null) ? ReadyDraggableScrollablePreferences.getWidth!() : null),
                   height: screenHeight,
                   child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
@@ -123,13 +121,15 @@ class ReadyDraggableScrollableSheetContainer {
     _contentOverlayEntry = getContentEntry();
 
     void push_() {
-      final ReadyDraggableScrollableSheetRoute route = ReadyDraggableScrollableSheetRoute(
+      late final ReadyDraggableScrollableSheetRoute route;
+
+      route = ReadyDraggableScrollableSheetRoute(
         settings: RouteSettings(name: controller.routeName),
         opaque: false,
         builder: (BuildContext context) {
           double sheetHeight = 0.0;
 
-          // - All (_Size) equals null when [fixedHeight] is set -
+          // All sizes equals "null" when [fixedHeight] is set.
 
           if (horizontalSeparatorSize != null) {
             sheetHeight += horizontalSeparatorSize!.height;
@@ -145,7 +145,7 @@ class ReadyDraggableScrollableSheetContainer {
 
           return ReadyDraggableScrollableSheet(
             controller: controller,
-            width: ((ReadyDraggableScrollablePreferences.getWidth_ != null) ? ReadyDraggableScrollablePreferences.getWidth_!(context) : null),
+            width: ((ReadyDraggableScrollablePreferences.getWidth != null) ? ReadyDraggableScrollablePreferences.getWidth!() : null),
             height: (fixedHeight ?? sheetHeight),
             builder: (BuildContext context, ScrollController scrollController) {
               return SingleChildScrollView(
@@ -185,6 +185,23 @@ class ReadyDraggableScrollableSheetContainer {
             openFromTop: openFromTop,
             borderRadius: borderRadius,
             colors: colors,
+            onDragged: ((route.withBarrier && ![null, 0].contains(route.barrierColor?.alpha))
+                ? (double maxHeight, double pixels) async {
+                    /*print('onDragged');
+                    print('maxHeight: $maxHeight');
+                    print('pixels: $pixels');*/
+
+                    await Future.delayed(const Duration(milliseconds: 150));
+
+                    if (route.offstage || !route.isActive) return;
+
+                    if (route.controller != null && !route.controller!.isDismissed) {
+                      route.controller!.stop(canceled: false);
+                      route.controller!.value = ((pixels / maxHeight) * 100) / 100;
+                      route.controller!.notifyListeners();
+                    }
+                  }
+                : null),
             onClosed: () {
               if (onClosed != null) onClosed!();
             },
@@ -196,9 +213,7 @@ class ReadyDraggableScrollableSheetContainer {
 
       controller.associateRoute = route; // Mandatory
 
-      Navigator.of(
-        ReadyDraggableScrollablePreferences.contextReference_!.value,
-      ).push(route);
+      Navigator.of(ReadyDraggableScrollablePreferences.context).push(route);
     }
 
     void open_() {
@@ -220,9 +235,7 @@ class ReadyDraggableScrollableSheetContainer {
 
         _contentOverlayEntry = getContentEntry();
 
-        Overlay.of(
-          ReadyDraggableScrollablePreferences.contextReference_!.value,
-        ).insert(_contentOverlayEntry);
+        Overlay.of(ReadyDraggableScrollablePreferences.context).insert(_contentOverlayEntry);
       } else {
         push_();
       }
@@ -244,13 +257,12 @@ class ReadyDraggableScrollableSheetContainer {
   }
 
   Future<void> dispose() async {
-    return;
+    if (controller.sheetIsBeingClosed.value == true) return;
 
     await controller.maybeClose(
       immediately: true,
     );
 
-    // _overlayEntry.dispose();
     controller.dispose();
   }
 }
